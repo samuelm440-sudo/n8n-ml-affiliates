@@ -1,9 +1,9 @@
 FROM n8nio/n8n:latest
 
-# Instalar Chromium y dependencias
+# Instalar Chromium y dependencias para Puppeteer
 RUN apt-get update && \
     apt-get install -y \
-    chromium-browser \
+    chromium \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
     libc6 \
@@ -43,9 +43,8 @@ RUN apt-get update && \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Establecer variable de entorno para Puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Configurar Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-# Exponer puerto
 EXPOSE 5678
