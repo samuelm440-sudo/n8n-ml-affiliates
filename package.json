@@ -1,0 +1,9 @@
+{
+  "name": "n8n-ml-affiliates",
+  "private": true,
+  "description": "Automatización de enlaces de afiliado para Mercado Libre México",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "echo \"Using Docker — ignore this.\""
+  }
+}
