@@ -16,6 +16,6 @@ services:
       - key: N8N_WEBHOOK_URL
         value: "https://n8n-ml-affiliates.onrender.com"
       - key: N8N_HOST
-        value: "n8n-ml-affiliates-1.onrender.com"
+        value: "0.0.0.0"
       - key: PORT
         value: "10000"
