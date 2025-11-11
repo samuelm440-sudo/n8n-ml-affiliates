@@ -48,3 +48,5 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 EXPOSE 5678
+# Comando para iniciar n8n
+CMD ["node", "packages/cli/dist/index.js"]
