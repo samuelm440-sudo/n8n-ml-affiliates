@@ -1,17 +1,18 @@
-# Etapa 1: Construcción con n8n
+# Etapa 1: n8n base
 FROM n8nio/n8n:latest AS n8n
 
-# Etapa 2: Agregar Chromium desde una imagen confiable
-FROM zenika/alpine-chrome:128 AS chrome
+# Etapa 2: Agregar Chromium desde browserless/chrome (activo en 2025)
+FROM browserless/chrome:alpine AS chrome
 
-# Etapa final: Combinar n8n + Chromium
+# Etapa final: Combinar
 FROM n8nio/n8n:latest
 
-# Copiar Chromium desde zenika/alpine-chrome
+# Copiar Chromium y librerías desde browserless/chrome
 COPY --from=chrome /usr/bin/chromium /usr/bin/chromium
 COPY --from=chrome /usr/lib/chromium /usr/lib/chromium
+COPY --from=chrome /usr/share/chromium /usr/share/chromium
 
-# Instalar dependencias de Chromium (Alpine)
+# Instalar dependencias mínimas (Alpine)
 RUN apk add --no-cache \
     nss \
     atk \
