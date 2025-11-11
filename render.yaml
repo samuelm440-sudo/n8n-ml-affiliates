@@ -23,6 +23,8 @@ services:
         value: sqlite
       - key: N8N_ENCRYPTION_KEY
         value: ml-affiliates-encryption-key-2024
+      - key: GENERIC_TIMEZONE
+        value: America/Mexico_City
     ports:
       - port: 5678
         protocol: HTTP
