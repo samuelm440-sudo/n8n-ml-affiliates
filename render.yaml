@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: n8n-ml-affiliates
+    env: docker
+    region: oregon
+    plan: free
+    envVars:
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        value: "samuel"
+      - key: N8N_BASIC_AUTH_PASSWORD
+        value: "4455668822"
+      - key: N8N_WEBHOOK_URL
+        value: "https://n8n-ml-affiliates.onrender.com"
+      - key: N8N_HOST
+        value: "0.0.0.0"
+      - key: PORT
+        value: "10000"
