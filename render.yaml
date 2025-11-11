@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: n8n-ml-affiliates
+    env: docker
+    region: oregon
+    plan: free
+    docker:
+      dockerfile: Dockerfile
+    envVars:
+      - key: N8N_PROTOCOL
+        value: https
+      - key: N8N_HOST
+        value: n8n-ml-affiliates-1.onrender.com
+      - key: N8N_WEBHOOK_URL
+        value: https://n8n-ml-affiliates-1.onrender.com
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        value: samuel
+      - key: N8N_BASIC_AUTH_PASSWORD
+        value: "4455668822"
+      - key: DB_TYPE
+        value: sqlite
+      - key: N8N_ENCRYPTION_KEY
+        value: ml-affiliates-encryption-key-2024
+    ports:
+      - port: 5678
+        protocol: HTTP
