@@ -1,8 +1,0 @@
-{
-  "name": "n8n-ml-affiliates",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "n8n start"
-  }
-}
