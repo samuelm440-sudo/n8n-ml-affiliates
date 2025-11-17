@@ -1,11 +1,8 @@
-FROM n8nio/n8n:latest
+FROM n8nio/n8n
 
-# Instalar curl para health checks
-USER root
-RUN apk update && apk add --no-cache curl
-USER node
-
+# Exponer el puerto de n8n
 EXPOSE 5678
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:5678/healthz || exit 1
+# Variables de entorno básicas
+ENV N8N_BASIC_AUTH_ACTIVE=true
+ENV N8N_PROTOCOL=https
