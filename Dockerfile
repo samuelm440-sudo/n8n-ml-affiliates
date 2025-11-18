@@ -1,10 +1,14 @@
-# Dockerfile para n8n con Playwright (VERSIÓN 8: Instalación Local Forzada)
+# Dockerfile para n8n con Playwright (VERSIÓN 9: Instalación Forzada y Limpia)
 
+# 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
 
+# --- Instalación de Playwright (Requiere Root) ---
+
+# 2. Cambiar temporalmente a usuario root para obtener permisos de instalación
 USER root
 
-# 1. Instalar las dependencias de Linux (igual que antes)
+# 3. Instalar las dependencias del sistema requeridas por Playwright (apk)
 RUN apk update \
     && apk add --no-cache \
     udev \
@@ -15,24 +19,31 @@ RUN apk update \
     chromium \
     && rm -rf /var/cache/apk/*
 
-# 2. Instalar una utilidad para forzar la instalación local
-# Esto nos permite instalar Playwright sin conflictos de 'workspace:*'
-RUN npm install -g npm-install-local
-
-# 3. Movernos al directorio de trabajo principal de n8n
+# 4. Establecer el directorio de trabajo principal de n8n
+# Este directorio contiene las librerías principales de n8n y su package.json
 WORKDIR /usr/local/lib/node_modules/n8n
 
-# 4. Crear la carpeta node_modules local si no existe (normalmente ya existe)
-RUN mkdir -p node_modules
+# 5. INSTALAR PLAYWRIGHT LOCALMENTE SIN CONFLICTOS:
+# --prefix . instala el paquete en ./node_modules, asegurando que esté en una ruta que n8n respeta.
+# El conflicto anterior de 'workspace:*' se maneja mejor en versiones recientes de NPM, o lo evitamos con este comando.
+RUN npm install --prefix . playwright 
 
-# 5. Instalar Playwright DENTRO de la carpeta node_modules de n8n
-# npm-install-local (n-i-l) instala la dependencia directamente, saltándose el chequeo de package.json
-RUN n-i-l playwright
-
-# 6. Instalar los binarios de Playwright
-# Se ejecuta en el mismo WORKDIR, por lo que los binarios se descargan aquí.
+# 6. Instalar los binarios de Playwright (usa la instalación local anterior)
 RUN npx playwright install
 
-# 7. Limpieza y usuario
+# 7. Volver al usuario predeterminado de n8n y limpiar ENV
 USER node 
-# ... el resto de tus configuraciones (EXPOSE, ENVs) ...
+# (Se eliminan NODE_PATH y npm-install-local)
+
+# --- Configuración de n8n ---
+
+# 8. Exponer el puerto de n8n
+EXPOSE 5678
+
+# 9. Variables de entorno básicas
+ENV N8N_BASIC_AUTH_ACTIVE=true
+ENV N8N_PROTOCOL=https
+
+# 10. ¡ÚLTIMO RECURSO DE SEGURIDAD!
+# Si la Solución 9 aún falla, usa esta variable de entorno:
+# ENV N8N_VM_CODE_LOW_SECURITY_MODE=true
