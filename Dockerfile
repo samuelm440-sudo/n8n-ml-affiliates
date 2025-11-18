@@ -1,11 +1,11 @@
-# Dockerfile para n8n con Playwright (VERSIÓN 10: Global + Baja Seguridad)
+# Dockerfile para n8n con Playwright (VERSIÓN FINAL)
 
 # 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
 
 # --- Instalación de Playwright (Requiere Root) ---
 
-# 2. Cambiar temporalmente a usuario root para obtener permisos de instalación
+# 2. Cambiar temporalmente a usuario root
 USER root
 
 # 3. Instalar las dependencias del sistema requeridas por Playwright (apk)
@@ -19,17 +19,18 @@ RUN apk update \
     chromium \
     && rm -rf /var/cache/apk/*
 
-# 4. Instalar la librería 'playwright' de forma global
+# 4. **Instalación Global:** Evita conflictos con el package.json de n8n.
 RUN npm install -g playwright
 
-# 5. Instalar los navegadores binarios de Playwright
+# 5. Instalar los binarios de Playwright
 RUN npx playwright install
 
 # 6. Establecer el directorio de trabajo predeterminado de n8n
 WORKDIR /usr/local/lib/node_modules/n8n
 
-# 7. **LA SOLUCIÓN:** Desactivar la sandbox de VM2 para permitir require() globales
-# ¡ADVERTENCIA! Esto reduce la seguridad de los nodos Code, dándoles acceso completo al sistema.
+# 7. **¡LA CLAVE!** Desactivar la sandbox de VM2:
+# Permite que los nodos Code accedan a módulos globales.
+# ADVERTENCIA: Esto reduce la seguridad del nodo Code.
 ENV N8N_VM_CODE_LOW_SECURITY_MODE=true
 
 # 8. Volver al usuario predeterminado de n8n
