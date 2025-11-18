@@ -1,4 +1,4 @@
-# Dockerfile para n8n con Playwright (CORRECCIÓN FINAL)
+# Dockerfile para n8n con Playwright (VERSIÓN FINAL)
 
 # 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
@@ -9,6 +9,7 @@ FROM n8nio/n8n
 USER root
 
 # 3. Instalar las dependencias del sistema requeridas por Playwright (apk)
+# Estas fueron instaladas correctamente en la ejecución anterior.
 RUN apk update \
     && apk add --no-cache \
     udev \
@@ -20,24 +21,18 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 
 # 4. Instalar la librería 'playwright' y sus navegadores
-# Hacemos toda la instalación de NPM y binarios mientras somos root para evitar errores de permisos.
-# Instalamos en la ubicación global /usr/local/lib/node_modules/
+# Ejecutamos la instalación de NPM y los binarios de los navegadores como root, 
+# pero quitamos --with-deps para evitar que ejecute 'apt-get'.
 RUN npm install -g playwright \
-    && npx playwright install --with-deps
+    && npx playwright install
 
 # 5. Volver al usuario predeterminado de n8n
 USER node 
 
-# --- Configuración de n8n y Limpieza ---
+# --- Configuración de n8n ---
 
-# 6. Mover la librería 'playwright' a la ubicación de módulos accesibles por n8n (opcional, pero buena práctica)
-# Ya está instalado globalmente, pero lo ponemos donde n8n pueda buscarlo fácilmente.
-# Nota: Como se instaló con -g, el require('playwright') debería funcionar sin esto, pero lo mantenemos por seguridad.
-# Sin embargo, si lo instalamos globalmente, n8n debe poder hacer require directamente. Simplificamos este paso.
-
+# 6. Establecer el directorio de trabajo predeterminado de n8n
 WORKDIR /usr/local/lib/node_modules/n8n
-
-# --- Tu Configuración Original ---
 
 # 7. Exponer el puerto de n8n
 EXPOSE 5678
