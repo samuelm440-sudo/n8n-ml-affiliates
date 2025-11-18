@@ -1,4 +1,4 @@
-# Dockerfile para n8n con Playwright (VERSIÓN 9: Instalación Forzada y Limpia)
+# Dockerfile para n8n con Playwright (VERSIÓN 10: Global + Baja Seguridad)
 
 # 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
@@ -19,31 +19,27 @@ RUN apk update \
     chromium \
     && rm -rf /var/cache/apk/*
 
-# 4. Establecer el directorio de trabajo principal de n8n
-# Este directorio contiene las librerías principales de n8n y su package.json
-WORKDIR /usr/local/lib/node_modules/n8n
+# 4. Instalar la librería 'playwright' de forma global
+RUN npm install -g playwright
 
-# 5. INSTALAR PLAYWRIGHT LOCALMENTE SIN CONFLICTOS:
-# --prefix . instala el paquete en ./node_modules, asegurando que esté en una ruta que n8n respeta.
-# El conflicto anterior de 'workspace:*' se maneja mejor en versiones recientes de NPM, o lo evitamos con este comando.
-RUN npm install --prefix . playwright 
-
-# 6. Instalar los binarios de Playwright (usa la instalación local anterior)
+# 5. Instalar los navegadores binarios de Playwright
 RUN npx playwright install
 
-# 7. Volver al usuario predeterminado de n8n y limpiar ENV
+# 6. Establecer el directorio de trabajo predeterminado de n8n
+WORKDIR /usr/local/lib/node_modules/n8n
+
+# 7. **LA SOLUCIÓN:** Desactivar la sandbox de VM2 para permitir require() globales
+# ¡ADVERTENCIA! Esto reduce la seguridad de los nodos Code, dándoles acceso completo al sistema.
+ENV N8N_VM_CODE_LOW_SECURITY_MODE=true
+
+# 8. Volver al usuario predeterminado de n8n
 USER node 
-# (Se eliminan NODE_PATH y npm-install-local)
 
 # --- Configuración de n8n ---
 
-# 8. Exponer el puerto de n8n
+# 9. Exponer el puerto de n8n
 EXPOSE 5678
 
-# 9. Variables de entorno básicas
+# 10. Variables de entorno básicas
 ENV N8N_BASIC_AUTH_ACTIVE=true
 ENV N8N_PROTOCOL=https
-
-# 10. ¡ÚLTIMO RECURSO DE SEGURIDAD!
-# Si la Solución 9 aún falla, usa esta variable de entorno:
-# ENV N8N_VM_CODE_LOW_SECURITY_MODE=true
