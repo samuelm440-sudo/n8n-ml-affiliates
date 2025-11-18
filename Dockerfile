@@ -1,4 +1,4 @@
-# Dockerfile para n8n con Playwright (VERSIÓN 5: Instalación Localizada)
+# Dockerfile para n8n con Playwright (VERSIÓN 6: Instalación Global)
 
 # 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
@@ -19,16 +19,17 @@ RUN apk update \
     chromium \
     && rm -rf /var/cache/apk/*
 
-# 4. Establecer el directorio de trabajo donde reside n8n y sus módulos
-# Playwright intentará instalar binarios aquí también, y es donde debe estar el paquete.
+# 4. Instalar la librería 'playwright' de forma global
+# La instalación global pone el módulo en /usr/local/lib/node_modules/playwright
+RUN npm install -g playwright
+
+# 5. Instalar los navegadores binarios de Playwright
+# npx playwright install asume que la librería está en el path global.
+RUN npx playwright install
+
+# 6. Establecer el directorio de trabajo predeterminado de n8n y volver al usuario node
+# WORKDIR debe estar DESPUÉS de la instalación global para evitar el conflicto de package.json.
 WORKDIR /usr/local/lib/node_modules/n8n
-
-# 5. Instalar la librería 'playwright' y sus navegadores
-# La instalación local de NPM no necesita -g.
-RUN npm install playwright \
-    && npx playwright install
-
-# 6. Volver al usuario predeterminado de n8n
 USER node 
 
 # --- Configuración de n8n ---
