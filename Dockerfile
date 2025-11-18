@@ -1,12 +1,14 @@
-# Dockerfile para n8n con Playwright (Optimizado para Alpine)
+# Dockerfile para n8n con Playwright (CORRECCIÓN FINAL)
 
 # 1. Usar la imagen base oficial de n8n
 FROM n8nio/n8n
 
-# --- Instalación de Playwright y sus dependencias ---
+# --- Instalación de Dependencias de Playwright (Requiere Root) ---
 
-# 2. Instalar las dependencias del sistema requeridas por Playwright (usando apk para Alpine)
-# Estas librerías son esenciales para que los navegadores headless funcionen.
+# 2. Cambiar temporalmente a usuario root para obtener permisos de instalación
+USER root
+
+# 3. Instalar las dependencias del sistema requeridas por Playwright (usando apk)
 RUN apk update \
     && apk add --no-cache \
     udev \
@@ -15,31 +17,35 @@ RUN apk update \
     nss \
     mesa-gl \
     chromium \
-    # Limpiar caché después de instalar
+    # Limpiar caché
     && rm -rf /var/cache/apk/*
 
-# 3. Establecer un directorio de trabajo temporal para la instalación de Playwright
-# Esto evita el error "Unsupported URL Type 'workspace:'"
+# 4. Cambiar de nuevo al usuario predeterminado de n8n
+# Esto asegura que los siguientes comandos y el servicio n8n se ejecuten con permisos limitados (seguridad).
+USER node 
+
+# --- Instalación del Módulo Playwright (Permisos de Usuario Estándar) ---
+
+# 5. Establecer un directorio de trabajo temporal para la instalación de Playwright
 WORKDIR /tmp/playwright_install
 
-# 4. Inicializar un nuevo proyecto simple y instalar la librería 'playwright'
+# 6. Inicializar un nuevo proyecto simple y instalar la librería 'playwright'
 RUN npm init -y \
     && npm install playwright \
     && npx playwright install --with-deps
 
-# 5. Mover los módulos instalados a la ubicación global de Node.js
-# Esto hace que Playwright esté disponible a través de 'require('playwright')' en el nodo Code de n8n.
+# 7. Mover los módulos instalados a la ubicación global de Node.js
 RUN mv node_modules/playwright /usr/local/lib/node_modules/playwright
 
-# 6. Limpiar el directorio temporal y volver al directorio de trabajo original de n8n
+# 8. Limpiar el directorio temporal y volver al directorio de trabajo original de n8n
 RUN rm -rf /tmp/playwright_install
 WORKDIR /usr/local/lib/node_modules/n8n
 
 # --- Tu Configuración Original ---
 
-# 7. Exponer el puerto de n8n
+# 9. Exponer el puerto de n8n
 EXPOSE 5678
 
-# 8. Variables de entorno básicas
+# 10. Variables de entorno básicas
 ENV N8N_BASIC_AUTH_ACTIVE=true
 ENV N8N_PROTOCOL=https
