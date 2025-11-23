@@ -1,58 +1,22 @@
-version: '3.8'
-
 services:
-  n8n:
-    build: .
-    container_name: n8n-ml-affiliates
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    environment:
-      - NODE_FUNCTION_ALLOW_EXTERNAL=playwright,chromium-bidi
-      # Configuración básica
-      - N8N_PROTOCOL=https
-      - N8N_HOST=n8n-ml-affiliates-1.onrender.com
-      - N8N_PORT=5678
-      - N8N_WEBHOOK_URL=https://n8n-ml-affiliates-1.onrender.com
-      
-      # Autenticación
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=samuel
-      - N8N_BASIC_AUTH_PASSWORD=4455668822
-      
-      # Base de datos (SQLite para simplicity)
-      - DB_TYPE=sqlite
-      - DB_SQLITE_DATABASE=/home/node/.n8n/database.sqlite
-      
-      # Seguridad
-      - N8N_ENCRYPTION_KEY=ml-affiliates-encryption-key-2024
-      
-      # Features
-      - N8N_DIAGNOSTICS_ENABLED=false
-      - N8N_PERSONALIZATION_ENABLED=false
-      
-      # Logs
-      - N8N_LOG_LEVEL=info
-      - N8N_LOG_OUTPUT=console
-      # PERMISOS: Esto permite que hagas require('playwright') en el nodo Code
-      - NODE_FUNCTION_ALLOW_EXTERNAL=playwright,chromium-bidi
-      
-      # Persistencia (Si usas Render Disk, monta el volumen en /home/node/.n8n)
-      # Si no pagas disco, asume que los datos se borrarán al reiniciar.
-      - DB_TYPE=sqlite
-      
-      # Configuración Webhook
-      - N8N_HOST=n8n-ml-affiliates-1.onrender.com
-      - N8N_EDITOR_BASE_URL=https://n8n-ml-affiliates-1.onrender.com
-      - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n-ml-affiliates-1.onrender.com/
-    volumes:
-      - n8n_data:/home/node/.n8n
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-volumes:
-  n8n_data:
+  - type: web
+    name: n8n-afiliados
+    env: docker
+    plan: starter # O 'free' si estás probando (ojo con la RAM)
+    healthCheckPath: /healthz
+    envVars:
+      - key: N8N_PORT
+        value: 5678
+      - key: N8N_PROTOCOL
+        value: https
+      # PERMITE QUE EL NODO 'CODE' USE PLAYWRIGHT
+      - key: NODE_FUNCTION_ALLOW_EXTERNAL
+        value: playwright,chromium-bidi
+      # EVITA QUE SE BORREN TUS DATOS (OBLIGATORIO EN RENDER)
+      # Genera una clave random aquí: https://randomkeygen.com/
+      - key: N8N_ENCRYPTION_KEY
+        generateValue: true
+    disk:
+      name: n8n-data
+      mountPath: /home/node/.n8n
+      sizeGB: 1
