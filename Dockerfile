@@ -1,46 +1,36 @@
-# Dockerfile para n8n con Playwright (VERSIÓN FINAL)
+# 1. Usamos la versión DEBIAN (Crucial para que Playwright funcione fácil)
+FROM n8nio/n8n:latest-debian
 
-# 1. Usar la imagen base oficial de n8n
-FROM n8nio/n8n
-
-# --- Instalación de Playwright (Requiere Root) ---
-
-# 2. Cambiar temporalmente a usuario root
 USER root
 
-# 3. Instalar las dependencias del sistema requeridas por Playwright (apk)
-RUN apk update \
-    && apk add --no-cache \
-    udev \
-    ttf-freefont \
-    libstdc++ \
-    nss \
-    mesa-gl \
-    chromium \
-    && rm -rf /var/cache/apk/*
+# 2. Instalar dependencias del sistema necesarias para correr navegadores
+# Estas son librerías de linux que Chromium necesita para arrancar
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. **Instalación Global:** Evita conflictos con el package.json de n8n.
+# 3. Instalar Playwright y los navegadores
+# Lo instalamos en la carpeta global de n8n para que el nodo lo encuentre
 RUN npm install -g playwright
 
-# 5. Instalar los binarios de Playwright
-RUN npx playwright install
+# 4. Instalar los binarios de Chromium (Navegador)
+RUN npx playwright install chromium --with-deps
 
-# 6. Establecer el directorio de trabajo predeterminado de n8n
-WORKDIR /usr/local/lib/node_modules/n8n
+# 5. Configurar variables de entorno para que n8n sepa dónde buscar
+ENV NODE_PATH=/usr/local/lib/node_modules
 
-# 7. **¡LA CLAVE!** Desactivar la sandbox de VM2:
-# Permite que los nodos Code accedan a módulos globales.
-# ADVERTENCIA: Esto reduce la seguridad del nodo Code.
-ENV N8N_VM_CODE_LOW_SECURITY_MODE=true
-
-# 8. Volver al usuario predeterminado de n8n
-USER node 
-
-# --- Configuración de n8n ---
-
-# 9. Exponer el puerto de n8n
-EXPOSE 5678
-
-# 10. Variables de entorno básicas
-ENV N8N_BASIC_AUTH_ACTIVE=true
-ENV N8N_PROTOCOL=https
+# 6. Volver al usuario node por seguridad
+USER node
