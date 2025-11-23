@@ -8,6 +8,7 @@ services:
     ports:
       - "5678:5678"
     environment:
+      - NODE_FUNCTION_ALLOW_EXTERNAL=playwright,chromium-bidi
       # Configuración básica
       - N8N_PROTOCOL=https
       - N8N_HOST=n8n-ml-affiliates-1.onrender.com
