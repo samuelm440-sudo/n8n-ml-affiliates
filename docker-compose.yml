@@ -33,7 +33,18 @@ services:
       # Logs
       - N8N_LOG_LEVEL=info
       - N8N_LOG_OUTPUT=console
+      # PERMISOS: Esto permite que hagas require('playwright') en el nodo Code
+      - NODE_FUNCTION_ALLOW_EXTERNAL=playwright,chromium-bidi
       
+      # Persistencia (Si usas Render Disk, monta el volumen en /home/node/.n8n)
+      # Si no pagas disco, asume que los datos se borrarán al reiniciar.
+      - DB_TYPE=sqlite
+      
+      # Configuración Webhook
+      - N8N_HOST=n8n-ml-affiliates-1.onrender.com
+      - N8N_EDITOR_BASE_URL=https://n8n-ml-affiliates-1.onrender.com
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n-ml-affiliates-1.onrender.com/
     volumes:
       - n8n_data:/home/node/.n8n
     healthcheck:
